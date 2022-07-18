@@ -26,4 +26,5 @@ jobs:
       - name: Run the script
         env:
           KEY: ${{ secrets.KEY }}
+          TOKEN: ${{ secrets.TOKEN }}
         run: python fuck_jdsd.py

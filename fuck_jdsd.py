@@ -1,4 +1,5 @@
 import os
+import sys
 
 import requests
 import json
@@ -10,9 +11,7 @@ import time
 '''
 # key_list = ['']
 key_list = [str(os.environ['KEY'])]
-
-print(str(os.environ['KEY']))
-print(key_list)
+pushplus_token = str(os.environ['TOKEN'])
 
 session = requests.session()
 headers = {
@@ -210,6 +209,30 @@ def serverchan(flag, message=None):
     response = requests.request("POST", url, headers=headers, data=payload)
 
 
+def pushplus(flag, message=None):
+    """
+    接入pushplus推送
+    """
+
+    token = pushplus_token
+
+    if not token:
+        if not flag:
+            sys.exit("跑分失败")
+        else:
+            sys.exit()
+    else:
+        if not flag:
+            title = content = "跑分失败"
+        else:
+            title = content = message
+
+    if token:
+        data = {"token": token, "title": title, "content": content}
+        url = "http://www.pushplus.plus/send/"
+        requests.post(url, data=data)
+
+
 if __name__ == '__main__':
     for key in key_list:
         try:
@@ -218,25 +241,33 @@ if __name__ == '__main__':
             if not flag:
                 raise Exception("登录失败 请验证key")
             print("姓名:{},当前积分:{}".format(info['name'], info['total']))
+
             # 签到+2
             signin()
             print('已完成签到')
+
             # 进行每日一题
             for i in range(15):
                 train()
             print('已完成每日一题')
+
             # 阅读一哈
             read()
             print('已完成阅读')
+
             # 匹配一哈
-            vs()
-            print('已完成匹配')
+            # vs()
+            # print('已完成匹配')
+
             # 返回
             flag, info = get_info()
             string = "今日获得:{} 总积分:{}".format(info['today'], info['total'])
             print(string)
-            # 通知 需要填入bark_url
+
+            # 通知 需要填入key或token
+            pushplus(1, message=string)
             # bark(1,message = string)
         except Exception as e:
             print(e)
+            pushplus(0, message=e)
             # bark(0,message = e)
