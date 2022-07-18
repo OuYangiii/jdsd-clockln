@@ -11,6 +11,9 @@ import time
 # key_list = ['']
 key_list = [str(os.environ['KEY'])]
 
+print(str(os.environ['KEY']))
+print(key_list)
+
 session = requests.session()
 headers = {
     'Host': 'jdsd.gzhu.edu.cn',
