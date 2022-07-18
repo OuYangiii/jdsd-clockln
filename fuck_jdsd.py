@@ -1,16 +1,17 @@
 import os
 import sys
 
+import eventlet
 import requests
 import json
 import random
 import time
 
-'''
-下方填写key 需抓包  key在更换微信登录后会改变 具体有效期尚未可知
-'''
+# 小程序key
 # key_list = ['']
 key_list = [str(os.environ['KEY'])]
+
+# pushplus token
 pushplus_token = str(os.environ['TOKEN'])
 
 session = requests.session()
@@ -255,9 +256,13 @@ if __name__ == '__main__':
             read()
             print('已完成阅读')
 
-            # 匹配一哈
-            # vs()
-            # print('已完成匹配')
+            # 匹配太久直接跳过 600s
+            eventlet.monkey_patch()
+            with eventlet.Timeout(600, False):
+                # 匹配一哈
+                vs()
+                print('已完成匹配')
+            print('匹配太久已跳过')
 
             # 返回
             flag, info = get_info()
