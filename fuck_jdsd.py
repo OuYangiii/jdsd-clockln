@@ -10,9 +10,12 @@ import time
 # 小程序key
 # key_list = ['']
 key_list = [str(os.environ['KEY'])]
-
 # pushplus token
 pushplus_token = str(os.environ['TOKEN'])
+# serverchan key
+serverchan_key = str(os.environ['SKEY'])
+# bark url
+bark_url = str(os.environ['BURL'])
 
 session = requests.session()
 headers = {
@@ -178,7 +181,7 @@ def post_answer(num, answer):
 
 def bark(flag, message=None):
     # 接入bark通知 可以修改bark_url推送到自己手机(iOS only)
-    bark_url = ''
+    url = bark_url
     global text1, text2
     if flag:
         text1 = '{}刷分成功/'.format(time.strftime("%Y-%m-%d", time.localtime()))
@@ -186,14 +189,13 @@ def bark(flag, message=None):
     else:
         text1 = '{}刷分失败了快去看看/'.format(time.strftime("%Y-%m-%d", time.localtime()))
         text2 = '快看看'
-    requests.post(bark_url + '/' + text1 + text2)
+    requests.post(url + '/' + text1 + text2)
 
 
 def serverchan(flag, message=None):
-    """
-    接入Serverchan通知
-    """
-    serverchan_key = ''
+    # 接入Serverchan通知
+
+    key = serverchan_key
 
     global text1, text2
     if flag:
@@ -202,7 +204,7 @@ def serverchan(flag, message=None):
     else:
         text1 = '{}刷分失败了快去看看/'.format(time.strftime("%Y-%m-%d", time.localtime()))
         text2 = '快看看'
-    url = f"https://sctapi.ftqq.com/{serverchan_key}.send?title={text1}&desp={text2}"
+    url = f"https://sctapi.ftqq.com/{key}.send?title={text1}&desp={text2}"
 
     payload = {}
     headers = {}
@@ -211,9 +213,7 @@ def serverchan(flag, message=None):
 
 
 def pushplus(flag, message=None):
-    """
-    接入pushplus推送
-    """
+    # 接入pushplus推送
 
     token = pushplus_token
 
@@ -272,8 +272,10 @@ if __name__ == '__main__':
 
             # 通知 需要填入key或token
             pushplus(1, message=string)
-            # bark(1,message = string)
+            serverchan(1, message=string)
+            bark(1, message=string)
         except Exception as e:
             print(e)
             pushplus(0, message=e)
-            # bark(0,message = e)
+            serverchan(0, message=e)
+            bark(0, message=e)

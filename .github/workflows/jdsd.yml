@@ -27,4 +27,6 @@ jobs:
         env:
           KEY: ${{ secrets.KEY }}
           TOKEN: ${{ secrets.TOKEN }}
+          SKEY: ${{ secrets.SKEY }}
+          BURL: ${{ secrets.BURL }}
         run: python fuck_jdsd.py
