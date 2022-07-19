@@ -256,9 +256,9 @@ if __name__ == '__main__':
             read()
             print('已完成阅读')
 
-            # 匹配太久直接跳过 600s
+            # 匹配太久直接跳过 900s
             eventlet.monkey_patch()
-            with eventlet.Timeout(600, False):
+            with eventlet.Timeout(900, False):
                 # 匹配一哈
                 vs()
                 print('已完成匹配')
