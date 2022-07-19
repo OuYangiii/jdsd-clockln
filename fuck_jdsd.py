@@ -241,7 +241,8 @@ if __name__ == '__main__':
             flag, info = get_info()
             if not flag:
                 raise Exception("登录失败 请验证key")
-            print("姓名:{},当前积分:{}".format(info['name'], info['total']))
+            # print("姓名:{},当前积分:{}".format(info['name'], info['total']))
+            print("当前积分:{}".format(info['total']))
 
             # 签到+2
             signin()
