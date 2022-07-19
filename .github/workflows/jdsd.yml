@@ -2,8 +2,7 @@ name: jdsd
 
 on:
   schedule:
-    #每天9点运行 GitHub服务器按GMT时间 要-8
-    - cron: '0 1 * * *'
+    - cron: '0 3 * * *'
 
   workflow_dispatch:
 

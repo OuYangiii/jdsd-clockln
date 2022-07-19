@@ -1,7 +1,6 @@
 import os
 import sys
 
-import eventlet
 import requests
 import json
 import random
@@ -179,59 +178,55 @@ def post_answer(num, answer):
     ans_data = session.post(url, data=post_answer_data).json()
 
 
-def bark(flag, message=None):
+def bark(value, message=None):
     # 接入bark通知 可以修改bark_url推送到自己手机(iOS only)
     url = bark_url
     global text1, text2
-    if flag:
+    if value:
         text1 = '{}刷分成功/'.format(time.strftime("%Y-%m-%d", time.localtime()))
         text2 = '返回信息:{}'.format(message)
     else:
-        text1 = '{}刷分失败了快去看看/'.format(time.strftime("%Y-%m-%d", time.localtime()))
-        text2 = '快看看'
-    requests.post(url + '/' + text1 + text2)
+        text1 = '{}刷分失败/'.format(time.strftime("%Y-%m-%d", time.localtime()))
+        text2 = '刷分失败'
+    r = requests.post(url + '/' + text1 + text2)
+    print('已推送bark：', r.text)
 
 
-def serverchan(flag, message=None):
+def serverchan(value, message=None):
     # 接入Serverchan通知
 
     key = serverchan_key
 
     global text1, text2
-    if flag:
+    if value:
         text1 = '{}刷分成功/'.format(time.strftime("%Y-%m-%d", time.localtime()))
         text2 = '返回信息:{}'.format(message)
     else:
-        text1 = '{}刷分失败了快去看看/'.format(time.strftime("%Y-%m-%d", time.localtime()))
-        text2 = '快看看'
-    url = f"https://sctapi.ftqq.com/{key}.send?title={text1}&desp={text2}"
+        text1 = '{}刷分失败/'.format(time.strftime("%Y-%m-%d", time.localtime()))
+        text2 = '刷分失败'
+    url = "https://sctapi.ftqq.com/{key}.send?title={text1}&desp={text2}"
 
     payload = {}
     headers = {}
 
-    response = requests.request("POST", url, headers=headers, data=payload)
+    r = requests.request("POST", url, headers=headers, data=payload)
+    print('已推送serverchan：', r.text)
 
 
-def pushplus(flag, message=None):
-    # 接入pushplus推送
+def pushplus(value, message=None):
+    # 接入pushplus通知
 
     token = pushplus_token
 
-    if not token:
-        if not flag:
-            sys.exit("跑分失败")
-        else:
-            sys.exit()
+    if value:
+        title = content = message
     else:
-        if not flag:
-            title = content = "跑分失败"
-        else:
-            title = content = message
+        title = content = "刷分失败"
 
-    if token:
-        data = {"token": token, "title": title, "content": content}
-        url = "http://www.pushplus.plus/send/"
-        requests.post(url, data=data)
+    data = {"token": token, "title": title, "content": content}
+    url = "http://www.pushplus.plus/send/"
+    r = requests.post(url, data=data)
+    print('已推送pushplus：', r.text)
 
 
 if __name__ == '__main__':
@@ -247,23 +242,16 @@ if __name__ == '__main__':
             # 签到+2
             signin()
             print('已完成签到')
-
             # 进行每日一题
             for i in range(15):
                 train()
             print('已完成每日一题')
-
             # 阅读一哈
             read()
             print('已完成阅读')
-
-            # 匹配太久直接跳过 900s
-            eventlet.monkey_patch()
-            with eventlet.Timeout(900, False):
-                # 匹配一哈
-                vs()
-                print('已完成匹配')
-            print('匹配太久已跳过')
+            # 匹配一哈
+            vs()
+            print('已完成匹配')
 
             # 返回
             flag, info = get_info()
@@ -271,11 +259,27 @@ if __name__ == '__main__':
             print(string)
 
             # 通知 需要填入key或token
-            pushplus(1, message=string)
-            serverchan(1, message=string)
-            bark(1, message=string)
+            if pushplus_token:
+                pushplus(1, message=string)
+
+            if serverchan_key:
+                serverchan(1, message=string)
+
+            if bark_url:
+                bark(1, message=string)
+            elif pushplus_token == serverchan_key == bark_url:
+                sys.exit('无需推送')
+
         except Exception as e:
             print(e)
-            pushplus(0, message=e)
-            serverchan(0, message=e)
-            bark(0, message=e)
+            # 通知 需要填入key或token
+            if pushplus_token:
+                pushplus(0, message=e)
+
+            if serverchan_key:
+                serverchan(0, message=e)
+
+            if bark_url:
+                bark(0, message=e)
+            elif pushplus_token == serverchan_key == bark_url:
+                sys.exit('无需推送')
