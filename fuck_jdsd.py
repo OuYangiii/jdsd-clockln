@@ -5,6 +5,7 @@ import requests
 import json
 import random
 import time
+import timeout_decorator
 
 # 小程序key
 # key_list = ['']
@@ -94,12 +95,14 @@ def read():
         end = session.post(url, data=read_data)
 
 
+# 最多匹配15分钟 此注解在Linux下可用
+@timeout_decorator.timeout(900)
 def vs():
     """
-    '朴实无华的匹配函数, 先变换counter找到对手, 后150秒内每隔一秒发送心跳包
-    '利用了一个bug, 在比赛结束后若继续发送心跳包, 会直接获得段位分和积分
-    '但是段位分无上限, 容易造成段位分过高
-    '这里判定了开始加分后, 会只执行五次加分操作
+    朴实无华的匹配函数, 先变换counter找到对手, 后150秒内每隔一秒发送心跳包
+    利用了一个bug, 在比赛结束后若继续发送心跳包, 会直接获得段位分和积分
+    但是段位分无上限, 容易造成段位分过高
+    这里判定了开始加分后, 会只执行五次加分操作
     """
     print('即将开始匹配 需要花费一定时间 请耐心等待')
     vs_find_data = {
@@ -183,7 +186,7 @@ def bark(value, message=None):
         content = '返回信息:{}'.format(message)
     else:
         title = '{}刷分失败/'.format(time.strftime("%Y-%m-%d", time.localtime()))
-        content = '刷分失败'
+        content = '刷分失败，有异常抛出'
     req = requests.post(b_url + '/' + title + content)
     print('已推送bark：', req.text)
 
@@ -199,7 +202,7 @@ def serverchan(value, message=None):
         content = '返回信息:{}'.format(message)
     else:
         title = '{}刷分失败'.format(time.strftime("%Y-%m-%d", time.localtime()))
-        content = '刷分失败'
+        content = '刷分失败，有异常抛出'
     s_url = f"https://sc.ftqq.com/{key}.send"
     data = {
         "text": title,
@@ -218,7 +221,7 @@ def pushplus(value, message=None):
     if value:
         title = content = message
     else:
-        title = content = "刷分失败"
+        title = content = "刷分失败，有异常抛出"
 
     data = {"token": token, "title": title, "content": content}
     p_url = "http://www.pushplus.plus/send/"
@@ -228,6 +231,8 @@ def pushplus(value, message=None):
 
 if __name__ == '__main__':
     for key in key_list:
+        push_done = False
+        '''已推送标记'''
         try:
             # 先验证登录
             flag, info = get_info()
@@ -236,19 +241,23 @@ if __name__ == '__main__':
             # print("姓名:{},当前积分:{}".format(info['name'], info['total']))
             print("当前积分:{}".format(info['total']))
 
-            # 签到+2
+            # 签到
             signin()
             print('已完成签到')
-            # 进行每日一题
+            # 每日一题
             for i in range(15):
                 train()
             print('已完成每日一题')
-            # 阅读一哈
+            # 阅读
             read()
             print('已完成阅读')
-            # 匹配一哈
-            vs()
-            print('已完成匹配')
+            # 匹配
+            try:
+                vs()
+                print('已完成匹配')
+            # 捕获异常 超时后可以继续运行
+            except Exception as e:
+                print(e)
 
             # 返回
             flag, info = get_info()
@@ -258,12 +267,15 @@ if __name__ == '__main__':
             # 通知 需要填入key或token
             if pushplus_token:
                 pushplus(1, message=string)
+                push_done = True
 
             if serverchan_key:
                 serverchan(1, message=string)
+                push_done = True
 
             if bark_url:
                 bark(1, message=string)
+                push_done = True
             elif pushplus_token == serverchan_key == bark_url:
                 sys.exit('无需推送')
 
@@ -271,12 +283,15 @@ if __name__ == '__main__':
             print(e)
             # 通知 需要填入key或token
             if pushplus_token:
-                pushplus(0, message=e)
+                if not push_done:
+                    pushplus(0, message=e)
 
             if serverchan_key:
-                serverchan(0, message=e)
+                if not push_done:
+                    serverchan(0, message=e)
 
             if bark_url:
-                bark(0, message=e)
+                if not push_done:
+                    bark(0, message=e)
             elif pushplus_token == serverchan_key == bark_url:
                 sys.exit('无需推送')
