@@ -14,9 +14,9 @@
 2. 推送可以使用
     - pushplus，在 Actions secrets 添加 `TOKEN` 参数
     - [server酱](https://sct.ftqq.com)，在 Actions secrets 添加 `SKEY` 参数
-    - bark，在 Actions secrets 添加 `BURL` 参数
-
+    - bark，在 Actions secrets 添加 `BURL` 参数（未测试，没有iOS设备）
 3. 不会设置 Actions secrets 请参考[此项目](https://github.com/LihaoLikeOrangeJuice/clockIn_gzhu)
+4. 每天下午3点运行
 
 ## 其他
 

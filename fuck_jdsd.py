@@ -9,11 +9,8 @@ import time
 # 小程序key
 # key_list = ['']
 key_list = [str(os.environ['KEY'])]
-# pushplus token
 pushplus_token = str(os.environ['TOKEN'])
-# serverchan key
 serverchan_key = str(os.environ['SKEY'])
-# bark url
 bark_url = str(os.environ['BURL'])
 
 session = requests.session()
@@ -139,7 +136,6 @@ def vs():
 
 '''
 下面两个函数是获取题目num和对应答案和提交匹配时答案的接口 但基本用不到 因为我们根本不需要提交...
-
 '''
 
 
@@ -180,16 +176,16 @@ def post_answer(num, answer):
 
 def bark(value, message=None):
     # 接入bark通知 可以修改bark_url推送到自己手机(iOS only)
-    url = bark_url
-    global text1, text2
+    b_url = bark_url
+    global title, content
     if value:
-        text1 = '{}刷分成功/'.format(time.strftime("%Y-%m-%d", time.localtime()))
-        text2 = '返回信息:{}'.format(message)
+        title = '{}刷分成功/'.format(time.strftime("%Y-%m-%d", time.localtime()))
+        content = '返回信息:{}'.format(message)
     else:
-        text1 = '{}刷分失败/'.format(time.strftime("%Y-%m-%d", time.localtime()))
-        text2 = '刷分失败'
-    r = requests.post(url + '/' + text1 + text2)
-    print('已推送bark：', r.text)
+        title = '{}刷分失败/'.format(time.strftime("%Y-%m-%d", time.localtime()))
+        content = '刷分失败'
+    req = requests.post(b_url + '/' + title + content)
+    print('已推送bark：', req.text)
 
 
 def serverchan(value, message=None):
@@ -197,20 +193,21 @@ def serverchan(value, message=None):
 
     key = serverchan_key
 
-    global text1, text2
+    global title, content
     if value:
-        text1 = '{}刷分成功/'.format(time.strftime("%Y-%m-%d", time.localtime()))
-        text2 = '返回信息:{}'.format(message)
+        title = '{}刷分成功'.format(time.strftime("%Y-%m-%d", time.localtime()))
+        content = '返回信息:{}'.format(message)
     else:
-        text1 = '{}刷分失败/'.format(time.strftime("%Y-%m-%d", time.localtime()))
-        text2 = '刷分失败'
-    url = "https://sctapi.ftqq.com/{key}.send?title={text1}&desp={text2}"
+        title = '{}刷分失败'.format(time.strftime("%Y-%m-%d", time.localtime()))
+        content = '刷分失败'
+    s_url = f"https://sc.ftqq.com/{key}.send"
+    data = {
+        "text": title,
+        "desp": content
+    }
+    req = requests.post(s_url, data=data)
 
-    payload = {}
-    headers = {}
-
-    r = requests.request("POST", url, headers=headers, data=payload)
-    print('已推送serverchan：', r.text)
+    print('已推送serverchan：', req.text)
 
 
 def pushplus(value, message=None):
@@ -224,9 +221,9 @@ def pushplus(value, message=None):
         title = content = "刷分失败"
 
     data = {"token": token, "title": title, "content": content}
-    url = "http://www.pushplus.plus/send/"
-    r = requests.post(url, data=data)
-    print('已推送pushplus：', r.text)
+    p_url = "http://www.pushplus.plus/send/"
+    req = requests.post(p_url, data=data)
+    print('已推送pushplus：', req.text)
 
 
 if __name__ == '__main__':
