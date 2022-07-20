@@ -95,8 +95,8 @@ def read():
         end = session.post(url, data=read_data)
 
 
-# 最多匹配15分钟 此注解在Linux下可用
-@timeout_decorator.timeout(900)
+# 最多匹配60分钟 此注解在Linux下可用
+@timeout_decorator.timeout(3600)
 def vs():
     """
     朴实无华的匹配函数, 先变换counter找到对手, 后150秒内每隔一秒发送心跳包
