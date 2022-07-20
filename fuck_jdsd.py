@@ -187,8 +187,8 @@ def bark(value, message=None):
     else:
         title = '{}刷分失败/'.format(time.strftime("%Y-%m-%d", time.localtime()))
         content = '刷分失败，有异常抛出'
-    req = requests.post(b_url + '/' + title + content)
-    print('已推送bark：', req.text)
+    requests.post(b_url + '/' + title + content)
+    print('已推送bark：')
 
 
 def serverchan(value, message=None):
@@ -208,9 +208,8 @@ def serverchan(value, message=None):
         "text": title,
         "desp": content
     }
-    req = requests.post(s_url, data=data)
-
-    print('已推送serverchan：', req.text)
+    requests.post(s_url, data=data)
+    print('已推送serverchan：')
 
 
 def pushplus(value, message=None):
@@ -225,8 +224,8 @@ def pushplus(value, message=None):
 
     data = {"token": token, "title": title, "content": content}
     p_url = "http://www.pushplus.plus/send/"
-    req = requests.post(p_url, data=data)
-    print('已推送pushplus：', req.text)
+    requests.post(p_url, data=data)
+    print('已推送pushplus：')
 
 
 if __name__ == '__main__':
